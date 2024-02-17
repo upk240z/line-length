@@ -7,19 +7,32 @@ fn show_line_length(path: &String) {
         Ok(file) => {
             let mut no = 0;
             let mut counter = 0;
+            let mut before: u8 = 0;
             for result in BufReader::new(file).bytes() {
                 match result {
                     Ok(byte) => {
-                        if byte == 0x0a || byte == 0x0d {
-                            if counter == 0 {
-                                continue;
-                            }
+                        // CR: 0x0d LF: 0x0a
+                        let mut line_break = false;
+
+                        if before == 0x0d {
+                            // CRLF or CR File
+                            line_break = true;
+                        } else if byte == 0x0a {
+                            // LF File
+                            line_break = true;
+                        }
+
+                        if line_break {
                             no += 1;
                             println!("{}:{}:{}", path, no, counter);
                             counter = 0;
-                        } else {
+                        }
+
+                        if byte != 0x0a && byte != 0x0d {
                             counter += 1;
                         }
+
+                        before = byte;
                     }
                     Err(err) => {
                         println!("{}", err);
@@ -29,7 +42,7 @@ fn show_line_length(path: &String) {
             }
 
             if counter > 0 {
-                println!("{}:{}", no + 1, counter);
+                println!("{}:{}:{}", path, no, counter);
             }
         }
         Err(err) => {
