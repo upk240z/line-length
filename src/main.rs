@@ -12,17 +12,10 @@ fn show_line_length(path: &String) {
                 match result {
                     Ok(byte) => {
                         // CR: 0x0d LF: 0x0a
-                        let mut line_break = false;
-
-                        if before == 0x0d {
-                            // CRLF or CR File
-                            line_break = true;
-                        } else if byte == 0x0a {
-                            // LF File
-                            line_break = true;
-                        }
-
-                        if line_break {
+                        // CRLF or CR File -> before == 0x0d
+                        // LF File -> byte == 0x0a
+                        if before == 0x0d || byte == 0x0a {
+                            // Line break
                             no += 1;
                             println!("{}:{}:{}", path, no, counter);
                             counter = 0;
